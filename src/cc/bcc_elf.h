@@ -26,11 +26,15 @@ extern "C" {
 struct bcc_elf_usdt {
   uint64_t pc;
   uint64_t base_addr;
+  // Virtual address semaphore is found at
   uint64_t semaphore;
 
   const char *provider;
   const char *name;
   const char *arg_fmt;
+
+  // Offset from start of file where the semaphore is at
+  uint64_t semaphore_offset;
 };
 
 // Binary module path, bcc_elf_usdt struct, payload
@@ -56,7 +60,7 @@ int bcc_elf_foreach_load_section(const char *path,
                                  bcc_elf_load_sectioncb callback,
                                  void *payload);
 // Iterate over symbol table of a binary module
-// Parameter "option" points to a bcc_symbol_option struct to indicate wheather
+// Parameter "option" points to a bcc_symbol_option struct to indicate whether
 // and how to use debuginfo file, and what types of symbols to load.
 // Returns -1 on error, and 0 on success or stopped by callback
 int bcc_elf_foreach_sym(const char *path, bcc_elf_symcb callback, void *option,
@@ -73,6 +77,7 @@ int bcc_elf_get_text_scn_info(const char *path, uint64_t *addr,
                               uint64_t *offset);
 
 int bcc_elf_get_type(const char *path);
+int bcc_elf_is_pie(const char *path);
 int bcc_elf_is_shared_obj(const char *path);
 int bcc_elf_is_exe(const char *path);
 int bcc_elf_is_vdso(const char *name);
